@@ -1,21 +1,35 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 
 class App extends Component {
+  addTrack() {
+    console.log('addTrack', this.trackInput.value);
+    this.props.onAddTrack(this.trackInput.value);
+    this.trackInput.value = '';
+  }
+  findTrack() {
+    console.log('findTrack', this.searchInput.value);
+    this.props.onFindTrack(this.searchInput.value);
+  }
   render() {
+    console.log(this.props.tracks);
     return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
+      <div>
+        <div>
+          <input type="text" ref= {(input) => { this.trackInput = input }}/>
+          <button type="button" onClick={this.addTrack.bind(this)}>Add track</button>
         </div>
-          <ul>
-              {this.props.testStore.map((item, index) =>
-                <li>{item.title}</li>
-              )}
-          </ul>
+        <div>
+          <input type="text" ref= {(input) => { this.searchInput = input }}/>
+          <button type="button" onClick={this.findTrack.bind(this)}>Find track</button>
+        </div>
+        <ul>
+          {
+            this.props.tracks.map((track, index) =>
+              <li key={index}>{track.name}</li>
+            )
+          }
+        </ul>
       </div>
     );
   }
@@ -23,7 +37,19 @@ class App extends Component {
 
 export default connect(
   state => ({
-    testStore: state
+    tracks: state.tracks.filter(track => track.name.includes(state.filterTracks)),
+    playlists: state.playlists
   }),
-  dispatch => ({})
+  dispatch => ({
+    onAddTrack: (name) => {
+      const payload = {
+        id: Date.now().toString(),
+        name
+      }
+      dispatch({ type: 'ADD_TRACK', payload });
+    },
+    onFindTrack: (name) => {
+      dispatch({ type: 'FIND_TRACK', payload: name });
+    }
+  })
 )(App);
